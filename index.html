@@ -2,64 +2,64 @@
 <html lang="en">
 	<head>
 		<meta charset='utf-8'>
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta n:00ame="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="X-UA-Compatible" content="ie=edge">
 		<title>VueJS Calender</title>
 
 		<link href='main.css' rel='stylesheet'>
+		<link href='demo.css' rel='stylesheet'>
+		<!-- <script src="https://momentjs.com/downloads/moment.js"></script> -->
+		<script src="node_modules/moment/moment.js"></script>
 	</head>
 
 	<body>
-		<div id='control' style="padding: 10px 5%;">
-			<input style="vertical-align: middle;" id="cb1" type="checkbox">
-			<label style="vertical-align: middle;" for="cb1">show half hour label</label>
+		<div id='control'>
+			<p id="p1">date is <span></span></p>
+			<input id="cb1" type="checkbox">
+			<label for="cb1">show half hour label</label>
 			<br>
 			<input type="button" id="btn1" value="generate datetime span">
+			<input type="button" id="btn2" value="save datetime span">
+			<input type="button" id="btn3" value="nav to today">
 		</div>
 		
-		<div id="container" style="margin: auto; width: 90%; height: 80%;">
-		<div id="calender">
-			<!-- <table @mouseleave='dragEnd'> -->
-			<table>
-				<tr class='ds-row-header'>
-					<th class='placeholder'></th>
-					<th 
-					scope='col' 
-					v-for="(day, i) in day_labels" 
-					:key="day" 
-					:col-index="i">{{ day }}</th>
-				</tr>
+		<div id="container">
+			<div id="calender">
+				<!-- <table @mouseleave='dragEnd'> -->
+				<table>
+					<tr class='ds-row-header'>
+						<th class='placeholder'></th>
+						<th 
+						scope='col' 
+						v-for="(label, i) in day_labels" 
+						:class="{ 'ds-today': cur_week && today.isSame(cur_week[i], 'day') }"
+						:key="label" 
+						:col-index="i">
+							<span v-if="cur_week">{{ label + " " + cur_week[i].format('M/D') }}</span>
+							<span v-else>{{ label }}</span>
+						</th>
+					</tr>
 
-				<tr 
-				v-for="(time, i) in time_labels" 
-				:class="{ 'ds-minor': (time.indexOf(':') != -1) }" 
-				:key="i" 
-				:row-index="i">
-					<td scope='row'>{{ (time.indexOf(':') == -1) ? time : "" }}</td>
-					<td 
-					class="ds-slot" 
-					v-for="(slots, j) in time_slot_mat" 
-					:key="j" 
-					:class="{ 'ds-avail':(overlay_mat[j][i]!=null) ? overlay_mat[j][i] : time_slot_mat[j][i] }"></td>
-				</tr>
-			</table>
-		</div>
+					<tr 
+					v-for="(time, i) in time_labels" 
+					:class="{ 'ds-minor': (time.indexOf(':') != -1) }" 
+					:key="i" 
+					:row-index="i">
+						<td scope='row'>{{ (time.indexOf(':30')==-1 || display_half_hour_labels) ? time : "" }}</td>
+						<td 
+						class="ds-slot" 
+						v-for="(slots, j) in time_slot_mat" 
+						:key="j" 
+						:class="{ 'ds-avail':(overlay_mat[j][i]!=null) ? overlay_mat[j][i] : time_slot_mat[j][i] }"></td>
+					</tr>
+				</table>
+			</div>
 		</div>
 	</body>
 
-	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<!-- <script src="https://vuejs.org/js/vue.js"></script> -->
+	<script src="node_modules/vue/dist/vue.js"></script>
 	<script src="main.js"></script>
-	<script type="text/javascript">
-		document.addEventListener('DOMContentLoaded', function(event){
-			// button click
-			document.getElementById('btn1')
-				.addEventListener('click', function(evt) {
-					var spans = app.genTimeSpan(app.time_slot_mat);
-					var txt = spans.join("\n");
-					console.log(spans)
-					alert(txt);
-				});
-		});
-	</script>
+	<script src="demo.js"></script>
 </html>
 

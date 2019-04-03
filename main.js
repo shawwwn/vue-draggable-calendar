@@ -103,7 +103,8 @@ var app = new Vue({
 		set_avail: false, // current selection is to set slot available or not
 		from_slot: null, // drag from slot
 		to_slot: null, // drag to slot
-		day_labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+		day_labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+		cur_week: null,
 		time_labels: [
 			"12am", "1am", "2am", "3am", "4am", "5am",
 			"6am", "7am", "8am", "9am", "10am", "11am",
@@ -111,13 +112,26 @@ var app = new Vue({
 			"6pm", "7pm", "8pm", "9pm", "10pm", "11pm"
 		],
 		half_hour_labels: true, // display half hour
+		display_half_hour_labels: false,
 		x_dim: null, // x dimension of the grid
 		y_dim: null, // y dimension of the grid
 		time_slot_mat: null, // actual timeslot fulfillment grid
 		overlay_mat: null, // section box over the grid
+		today: moment(),
 	},
 
 	methods: {
+		// render current week from input date
+		navigateToDate(date) {
+			date = moment(date);
+			var week = [];
+			this.day_labels.forEach(function(label, i) {
+				let wd = moment(label, 'ddd').weekday();
+				week.push(moment(date).weekday(wd));
+			}); 
+			this.cur_week = week;
+		},
+
 		// start dragging
 		dragBegin: function(evt) {
 			evt.stopPropagation();

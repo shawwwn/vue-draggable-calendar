@@ -1,0 +1,24 @@
+input, label {
+	vertical-align: middle;
+}
+
+p {
+	margin: 0;
+}
+
+input[type="button"] {
+	padding: 10px;
+	margin: 3px;
+}
+
+#control {
+	padding: 10px 5%;
+}
+
+#container {
+	margin: auto; width: 90%; height: 80%;
+}
+
+#p1 > span {
+	font-weight: bold;
+}

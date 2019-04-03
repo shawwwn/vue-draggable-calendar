@@ -21,6 +21,7 @@ table {
 	border-color: #ddd;
 	border-width: 1px;
 	table-layout: fixed;
+	box-sizing: border-box;
 }
 
 th {
@@ -29,6 +30,8 @@ th {
 	padding: 0;
 	margin: 0;
 	border: 1px solid #ddd;
+	box-sizing: border-box;
+	padding: 5px;
 }
 
 td {
@@ -39,6 +42,7 @@ td {
 	border-color: inherit;
 	border-width: 1px;
 	border-style: none solid;
+	box-sizing: border-box;
 }
 
 tr [scope="row"], .placeholder {
@@ -52,6 +56,7 @@ tr {
 	border-style: none solid none solid;
 	border-color: inherit;
 	border-width: 1px;
+	box-sizing: border-box;
 }
 
 tr.ds-minor {
@@ -65,4 +70,8 @@ tr.ds-minor {
 
 .ds-avail {
 	background-color: green;
+}
+
+.ds-today {
+	background-color: #fffacd87;
 }
