@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset='utf-8'>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta http-equiv="X-UA-Compatible" content="ie=edge">
+		<title>VueJS Calender</title>
+
+		<link href='main.css' rel='stylesheet'>
+	</head>
+
+	<body>
+		<div id='control' style="padding: 10px 5%;">
+			<input style="vertical-align: middle;" id="cb1" type="checkbox">
+			<label style="vertical-align: middle;" for="cb1">show half hour label</label>
+			<br>
+			<input type="button" id="btn1" value="generate datetime span">
+		</div>
+		
+		<div id="container" style="margin: auto; width: 90%; height: 80%;">
+		<div id="calender">
+			<!-- <table @mouseleave='dragEnd'> -->
+			<table>
+				<tr class='ds-row-header'>
+					<th class='placeholder'></th>
+					<th 
+					scope='col' 
+					v-for="(day, i) in day_labels" 
+					:key="day" 
+					:col-index="i">{{ day }}</th>
+				</tr>
+
+				<tr 
+				v-for="(time, i) in time_labels" 
+				:class="{ 'ds-minor': (time.indexOf(':') != -1) }" 
+				:key="i" 
+				:row-index="i">
+					<td scope='row'>{{ (time.indexOf(':') == -1) ? time : "" }}</td>
+					<td 
+					class="ds-slot" 
+					v-for="(slots, j) in time_slot_mat" 
+					:key="j" 
+					:class="{ 'ds-avail':(overlay_mat[j][i]!=null) ? overlay_mat[j][i] : time_slot_mat[j][i] }"></td>
+				</tr>
+			</table>
+		</div>
+		</div>
+	</body>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+	<script src="main.js"></script>
+	<script type="text/javascript">
+		document.addEventListener('DOMContentLoaded', function(event){
+			// button click
+			document.getElementById('btn1')
+				.addEventListener('click', function(evt) {
+					var spans = app.genTimeSpan(app.time_slot_mat);
+					var txt = spans.join("\n");
+					console.log(spans)
+					alert(txt);
+				});
+		});
+	</script>
+</html>
+

@@ -1,0 +1,68 @@
+html, body {
+	margin: 0;
+	padding: 0;
+	font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+	font-size: 14px;
+	height: 100%;
+}
+
+#calender {
+	margin: auto;
+	width: 100%;
+	height: 100%;
+	box-sizing: border-box;
+	overflow: auto;
+}
+
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+	width: 100%;
+	border-color: #ddd;
+	border-width: 1px;
+	table-layout: fixed;
+}
+
+th {
+	height: 20px;
+	min-height: 20px;
+	padding: 0;
+	margin: 0;
+	border: 1px solid #ddd;
+}
+
+td {
+	height: 20px;
+	min-height: 20px;
+	padding: 0;
+	margin: 0;
+	border-color: inherit;
+	border-width: 1px;
+	border-style: none solid;
+}
+
+tr [scope="row"], .placeholder {
+	width: 50px;
+	text-align: center;
+	overflow: hidden;
+}
+
+tr {
+	border: none;
+	border-style: none solid none solid;
+	border-color: inherit;
+	border-width: 1px;
+}
+
+tr.ds-minor {
+	border-width: 1px;
+	border-style: dotted solid solid solid;
+}
+
+.ds-slot {
+	user-select: none;
+}
+
+.ds-avail {
+	background-color: green;
+}
