@@ -11,14 +11,21 @@ document.addEventListener('DOMContentLoaded', function(event){
 	// button click
 	document.getElementById('btn1')
 		.addEventListener('click', function(evt) {
-			var spans = app.genTimeSpan(app.time_slot_mat);
-			var txt = spans.join("\n");
+			var data = app.matrix2span(app.mat);
+			if (!data) { return; }
+
+			var txt = [];
+			Object.keys(data).forEach(function(date, i) {
+				txt.push(date + ": " + JSON.stringify(data[date]));
+			});
+
+			txt = txt.join("\n");
 			alert(txt);
 		});
 	document.getElementById('btn2')
 		.addEventListener('click', function(evt) {
-			var spans = app.genTimeSpan(app.time_slot_mat);
-			console.log(spans);
+			var data = app.matrix2span(app.mat);
+			console.log(data);
 		});
 	document.getElementById('btn3')
 		.addEventListener('click', function(evt) {

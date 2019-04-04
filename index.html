@@ -18,8 +18,8 @@
 			<input id="cb1" type="checkbox">
 			<label for="cb1">show half hour label</label>
 			<br>
-			<input type="button" id="btn1" value="generate datetime span">
-			<input type="button" id="btn2" value="save datetime span">
+			<input type="button" id="btn1" value="show datetime spans">
+			<input type="button" id="btn2" value="print datetime spans">
 			<input type="button" id="btn3" value="nav to today">
 		</div>
 		
@@ -48,9 +48,9 @@
 						<td scope='row'>{{ (time.indexOf(':30')==-1 || display_half_hour_labels) ? time : "" }}</td>
 						<td 
 						class="ds-slot" 
-						v-for="(slots, j) in time_slot_mat" 
+						v-for="(slots, j) in mat" 
 						:key="j" 
-						:class="{ 'ds-avail':(overlay_mat[j][i]!=null) ? overlay_mat[j][i] : time_slot_mat[j][i] }"></td>
+						:class="{ 'ds-avail':(mat_overlay[j][i]!=null) ? mat_overlay[j][i] : mat[j][i] }"></td>
 					</tr>
 				</table>
 			</div>

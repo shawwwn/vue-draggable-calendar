@@ -61,11 +61,13 @@ var util_funcs = {
 			});
 		},
 
-		// generate datetime spans from matrix
-		genTimeSpan(mat) {
+		// generate span data from matrix of current week
+		matrix2span(mat) {
+			if (!this.cur_week) { return; } // exit if not initialized
 			var self = this;
-			var spans = [];
+			var data = {}; // key is day, value is array of time spans
 			mat.forEach(function(col, coli) {
+				let spans = [];
 				let span = null;
 				for (var rowi=0; rowi<col.length; rowi++) {
 					if (col[rowi]) {
@@ -77,20 +79,80 @@ var util_funcs = {
 						if (span) {
 							// span ends at white
 							span += " - "+self.time_labels[rowi];
-							spans.push(self.day_labels[coli]+", "+span);
+							spans.push(span);
 							span = null;
 						}
 					}
 				}
 
-				// in case span didn't end
 				if (span) {
-					spans.push(self.day_labels[coli]+", "+span+" - 12am");
+					// span to very last row
+					spans.push(span+" - 12am");
+				}
+
+				if (spans.length > 0) {
+					// day has time spans
+					let date = self.cur_week[coli].format('YYYY-MM-DD');
+					data[date] = spans;
 				}
 			});
 
-			return spans;
-		}
+			return data;
+		},
+
+		// generate matrix from span data
+		span2matrix(data) {
+			if (!this.cur_week) { return; } // exit if not initialized
+			var self = this;
+			var mat = self.create2DMatrix(self.x_dim, self.y_dim, val=false);
+			
+			self.cur_week.forEach(function(m, mi) {
+				let key = m.format('YYYY-MM-DD');
+				if (data.hasOwnProperty(key)) {
+					data[key].forEach(function(span, si) {
+						let idx_pair = parseSpan(span); // [starti, stopi]
+						if (idx_pair) {
+							mat[mi].fill(true, idx_pair[0], idx_pair[1]);
+						}
+					});
+				}
+			});
+
+			return mat;
+
+			// text of time span to matrix index
+			function parseSpan(span) {
+				var time_pair = span.split(' - ');
+				var idx_pair = time_pair.map(time2index);
+				if (idx_pair[1] == 0) {
+					idx_pair[1] = 48;
+				}
+				if ((typeof idx_pair[0] != 'number') ||
+					(typeof idx_pair[1] != 'number') ||
+					(idx_pair[0] > idx_pair[1]) || 
+					(idx_pair[0] < 0) ||
+					(idx_pair[1] > 48)) {
+					return;
+				}
+				return idx_pair;
+
+				// time text to matrix index
+				function time2index(time) {
+					var match = time.match(/(\d+)(?::(\d+))?(am|pm)/i);
+					if (match) {
+						let hr = parseInt(match[1])
+						let min = parseInt((match[2] == undefined) ? 0 : match[2]);
+						let ampm = match[3];
+						if (hr == 12 && ampm == "am") { hr = 0; }
+						let idx = (hr * 2)
+								+ (min / 30 >> 0)
+								+ ((ampm == "am") ? 0 : 24);
+						return idx;
+					}
+					return;
+				}
+			}
+		},
 	}
 }
 
@@ -104,20 +166,21 @@ var app = new Vue({
 		from_slot: null, // drag from slot
 		to_slot: null, // drag to slot
 		day_labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-		cur_week: null,
+		cur_week: null, // [moment(), moment(), ...x7]
 		time_labels: [
 			"12am", "1am", "2am", "3am", "4am", "5am",
 			"6am", "7am", "8am", "9am", "10am", "11am",
 			"12pm", "1pm", "2pm", "3pm", "4pm", "5pm",
 			"6pm", "7pm", "8pm", "9pm", "10pm", "11pm"
 		],
-		half_hour_labels: true, // display half hour
-		display_half_hour_labels: false,
-		x_dim: null, // x dimension of the grid
-		y_dim: null, // y dimension of the grid
-		time_slot_mat: null, // actual timeslot fulfillment grid
-		overlay_mat: null, // section box over the grid
+		half_hour_labels: true, // include half-hour labels in time_labels
+		display_half_hour_labels: false, // show half-hour label name
+		x_dim: null, // x dimension of the grid/matrix
+		y_dim: null, // y dimension of the grid/matrix
+		mat: null, // actual timeslot fulfillment grid
+		mat_overlay: null, // section box over the grid
 		today: moment(),
+		data: {}, // date time spans
 	},
 
 	methods: {
@@ -140,7 +203,7 @@ var app = new Vue({
 			this.set_avail = (this.isSlotAvailable(evt.target)) ? false : true;
 			this.from_slot = evt.target;
 			var [x, y] = this.getCoords(this.from_slot);
-			this.overlay_mat[x][y] = this.set_avail;
+			this.mat_overlay[x][y] = this.set_avail;
 			this.$forceUpdate();
 			// console.log(`drag begin(${this.set_avail})`, this.from_slot, this.getCoords(this.from_slot));
 		},
@@ -154,8 +217,8 @@ var app = new Vue({
 					this.getCoords(this.from_slot),
 					this.getCoords(this.to_slot)
 				];
-				this.resetMatrix(this.overlay_mat, null);
-				this.updateMatrix(this.overlay_mat, rect, this.set_avail) &&
+				this.resetMatrix(this.mat_overlay, null);
+				this.updateMatrix(this.mat_overlay, rect, this.set_avail) &&
 				this.$forceUpdate();
 				// console.log(`drag at(${this.set_avail})`, this.to_slot, this.getCoords(this.to_slot));
 
@@ -169,7 +232,7 @@ var app = new Vue({
 			if (this.dragging) {
 				this.dragging = false;
 				this.to_slot = evt.target;
-				this.mergeMatrices(this.time_slot_mat, this.overlay_mat);
+				this.mergeMatrices(this.mat, this.mat_overlay);
 				this.$forceUpdate();
 				// console.log(`drag end(${this.set_avail})`, this.to_slot, this.getCoords(this.to_slot));
 			}
@@ -181,7 +244,7 @@ var app = new Vue({
 			if (this.dragging) {
 				this.dragging = false;
 				this.to_slot = null;
-				this.mergeMatrices(this.time_slot_mat, this.overlay_mat);
+				this.mergeMatrices(this.mat, this.mat_overlay);
 				this.$forceUpdate();
 				// console.log(`drag out(${this.set_avail})`, this.to_slot);
 			}
@@ -201,12 +264,12 @@ var app = new Vue({
 		// generate time slot matrix (column major)
 		this.x_dim = this.day_labels.length;
 		this.y_dim = this.time_labels.length;
-		this.time_slot_mat = this.create2DMatrix(this.x_dim, this.y_dim, false);
-		this.overlay_mat = this.create2DMatrix(this.x_dim, this.y_dim, null);
+		this.mat = this.create2DMatrix(this.x_dim, this.y_dim, false);
+		this.mat_overlay = this.create2DMatrix(this.x_dim, this.y_dim, null);
+
+		this.navigateToDate(); // today
 
 		// TODO: update time slot matrix from DB
-		this.time_slot_mat[0][0]=true;
-		this.time_slot_mat[2][3]=true;
 	},
 
 	mounted() {
