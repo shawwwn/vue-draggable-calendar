@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function(event){
 	// button click
 	document.getElementById('btn1')
 		.addEventListener('click', function(evt) {
-			var data = app.matrix2span(app.mat);
+			var data = app.matrix2span(app.mat, true);
 			if (!data) { return; }
 			console.log(data);
 

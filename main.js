@@ -62,7 +62,7 @@ var util_funcs = {
 		},
 
 		// generate span data from matrix of current week
-		matrix2span(mat) {
+		matrix2span(mat, drop_null=false) {
 			if (!this.cur_week) { return; } // exit if not initialized
 			var self = this;
 			var data = {}; // key is day, value is array of time spans
@@ -94,7 +94,7 @@ var util_funcs = {
 				if (spans.length > 0) {
 					// day has time spans
 					data[date] = spans;
-				} else {
+				} else if (!drop_null) {
 					data[date] = null;
 				}
 			});
