@@ -14,8 +14,10 @@ db = MockDB('db.json')
 
 class DataTimeSpans(Resource):
 	def get(self):
-		print("GET:")
-		return db.get()
+		print("GET:", request.form)
+		from_date = request.args['from']
+		to_date = request.args['to']
+		return db.get(from_date, to_date)
 
 	def put(self):
 		json_data = request.get_json(force=True)
