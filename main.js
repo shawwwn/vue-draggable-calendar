@@ -198,7 +198,7 @@ var app = new Vue({
 		// start dragging
 		dragBegin: function(evt) {
 			evt.stopPropagation();
-			if ('which' in evt && evt.which != 1) return;
+			if ('which' in evt && evt.which != 1) { return; }
 			this.dragging = true;
 			this.set_avail = (this.isSlotAvailable(evt.target)) ? false : true;
 			this.from_slot = evt.target;
@@ -221,7 +221,6 @@ var app = new Vue({
 				this.updateMatrix(this.mat_overlay, rect, this.set_avail) &&
 				this.$forceUpdate();
 				// console.log(`drag at(${this.set_avail})`, this.to_slot, this.getCoords(this.to_slot));
-
 			}
 		},
 
