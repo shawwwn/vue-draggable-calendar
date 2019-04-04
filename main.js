@@ -90,10 +90,12 @@ var util_funcs = {
 					spans.push(span+" - 12am");
 				}
 
+				let date = self.cur_week[coli].format('YYYY-MM-DD');
 				if (spans.length > 0) {
 					// day has time spans
-					let date = self.cur_week[coli].format('YYYY-MM-DD');
 					data[date] = spans;
+				} else {
+					data[date] = null;
 				}
 			});
 
@@ -108,7 +110,7 @@ var util_funcs = {
 			
 			self.cur_week.forEach(function(m, mi) {
 				let key = m.format('YYYY-MM-DD');
-				if (data.hasOwnProperty(key)) {
+				if (data[key]) {
 					data[key].forEach(function(span, si) {
 						let idx_pair = parseSpan(span); // [starti, stopi]
 						if (idx_pair) {

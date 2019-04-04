@@ -30,7 +30,9 @@ document.addEventListener('DOMContentLoaded', function(event){
 	document.getElementById('btn3')
 		.addEventListener('click', function(evt) {
 			var date = prompt("Enter the date you wish to navigate to:", moment().format('YYYY-MM-DD'));
-			app.navigateToDate(moment(date));
+			if (date) {
+				app.navigateToDate(moment(date));
+			}
 		});
 
 	// checkbox
