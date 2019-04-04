@@ -205,7 +205,7 @@ var app = new Vue({
 			this.set_avail = (this.isSlotAvailable(evt.target)) ? false : true;
 			this.from_slot = evt.target;
 			var [x, y] = this.getCoords(this.from_slot);
-			this.mat_overlay[x][y] = this.set_avail;
+			this.mat[x][y] = this.set_avail;
 			this.$forceUpdate();
 			// console.log(`drag begin(${this.set_avail})`, this.from_slot, this.getCoords(this.from_slot));
 		},
@@ -234,6 +234,7 @@ var app = new Vue({
 				this.dragging = false;
 				this.to_slot = evt.target;
 				this.mergeMatrices(this.mat, this.mat_overlay);
+				this.resetMatrix(this.mat_overlay, null);
 				this.$forceUpdate();
 				// console.log(`drag end(${this.set_avail})`, this.to_slot, this.getCoords(this.to_slot));
 			}
@@ -246,6 +247,7 @@ var app = new Vue({
 				this.dragging = false;
 				this.to_slot = null;
 				this.mergeMatrices(this.mat, this.mat_overlay);
+				this.resetMatrix(this.mat_overlay, null);
 				this.$forceUpdate();
 				// console.log(`drag out(${this.set_avail})`, this.to_slot);
 			}

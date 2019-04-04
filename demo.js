@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', function(event){
 				app.navigateToDate(moment(date));
 			}
 		});
+	document.getElementById('btn4')
+		.addEventListener('click', function(evt) {
+			app.resetMatrix(app.mat, false);
+			app.$forceUpdate();
+		});
 
 	// checkbox
 	document.getElementById('cb1')
