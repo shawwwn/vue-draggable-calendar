@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function(event){
 		.addEventListener('click', function(evt) {
 			var data = app.matrix2span(app.mat);
 			if (!data) { return; }
+			console.log(data);
 
 			var txt = [];
 			Object.keys(data).forEach(function(date, i) {
@@ -24,6 +25,8 @@ document.addEventListener('DOMContentLoaded', function(event){
 		});
 	document.getElementById('btn2')
 		.addEventListener('click', function(evt) {
+			app.resetMatrix(app.mat, false);
+			app.$forceUpdate();
 			var data = app.matrix2span(app.mat);
 			console.log(data);
 		});
@@ -36,8 +39,7 @@ document.addEventListener('DOMContentLoaded', function(event){
 		});
 	document.getElementById('btn4')
 		.addEventListener('click', function(evt) {
-			app.resetMatrix(app.mat, false);
-			app.$forceUpdate();
+			console.log(app.data)
 		});
 
 	// checkbox
