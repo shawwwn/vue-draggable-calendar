@@ -11,12 +11,12 @@ input[type="button"] {
 	margin: 3px;
 }
 
-#control {
+#demo-control {
 	padding: 10px 5%;
 }
 
-#container {
-	margin: auto; width: 90%; height: 80%;
+#demo-container {
+	margin: auto; width: 90%; height: 75%;
 }
 
 #p1 > span {

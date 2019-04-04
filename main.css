@@ -10,6 +10,13 @@ html, body {
 	margin: auto;
 	width: 100%;
 	height: 100%;
+	min-width: 500px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+}
+
+.ds-calender {
 	box-sizing: border-box;
 	overflow: auto;
 }
@@ -22,10 +29,10 @@ table {
 	border-width: 1px;
 	table-layout: fixed;
 	box-sizing: border-box;
+	height: 100%;
 }
 
 th {
-	height: 20px;
 	min-height: 20px;
 	padding: 0;
 	margin: 0;
@@ -74,4 +81,42 @@ tr.ds-minor {
 
 .ds-today {
 	background-color: #fffacd87;
+}
+
+.ds-nav {
+	margin: 0;
+	padding: 0;
+
+}
+
+.ds-nav > th {
+	padding: 0;
+	font-weight: normal;
+}
+
+th[scope="col"], .placeholder {
+	border-top: none;
+}
+
+.ds-control {
+	flex: 1 0 30px;
+}
+
+.ds-nav-btn {
+	width: 10%;
+	user-select: none;
+}
+
+.ds-nav-btn:hover {
+	background-color: #57a3f3;
+	color: white;
+}
+
+.ds-nav-btn:active {
+	background-color: #2b85e4;
+	color: white;
+}
+
+.ds-nav-info {
+
 }

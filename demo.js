@@ -6,7 +6,7 @@
 document.addEventListener('DOMContentLoaded', function(event){
 	// time
 	document.querySelector('#p1 > span')
-		.innerText = app.date;
+		.innerText = app.today;
 
 	// button click
 	document.getElementById('btn1')
