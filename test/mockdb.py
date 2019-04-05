@@ -32,11 +32,11 @@ class MockDB:
 		from_date = datetime.strptime(from_date, '%Y-%m-%d').toordinal() if from_date else datetime.now().toordinal()
 		to_date = datetime.strptime(to_date, '%Y-%m-%d').toordinal() if to_date else from_date+1
 		delta = to_date - from_date
-		if delta < 1:
+		if delta < 0:
 			return { 'error': 'invalid from/to date' }
 
 		out = {}
-		for d in range(delta):
+		for d in range(delta+1):
 			key = datetime.fromordinal(from_date + d).strftime('%Y-%m-%d')
 			if key in self.data:
 				out[key] = self.data[key] # TODO: exception catching
@@ -44,9 +44,10 @@ class MockDB:
 
 	def update(self, data):
 		for key in data:
-			datum = data[key];
+			datum = data[key]
 			if datum is None:
-				key in self.data and self.data.pop(key)
+				if key in self.data:
+					self.data.pop(key)
 			else:
 				self.data[key] = datum
 		# self.flush()
