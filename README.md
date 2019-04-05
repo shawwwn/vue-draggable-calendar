@@ -13,4 +13,4 @@ npm install
 cd test
 python server.py
 ```
-Then open browser & go to http://127.0.0.1:9876/index.html
+Then open browser & go to http://127.0.0.1:5000/

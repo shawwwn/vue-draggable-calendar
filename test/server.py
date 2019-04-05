@@ -2,7 +2,7 @@
 
 import json
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 from flask_restful import Resource, Api
 
 from mockdb import MockDB
@@ -10,10 +10,11 @@ from mockdb import MockDB
 app = Flask(__name__,
 	static_url_path='',
 	static_folder='../')
-api = Api(app)
+@app.route('/')
+def index():
+	return redirect('/index.html')
 
 db = MockDB('db.json')
-
 class DataTimeSpans(Resource):
 	def get(self):
 		print("GET:", request.args)
@@ -27,7 +28,8 @@ class DataTimeSpans(Resource):
 		db.update(json_data)
 		return db.get()
 
+api = Api(app)
 api.add_resource(DataTimeSpans, '/api/calendar')
 
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=9876, debug=True)
+	app.run(host='127.0.0.1', port=5000, debug=True)
