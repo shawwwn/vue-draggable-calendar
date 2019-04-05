@@ -41,6 +41,15 @@ document.addEventListener('DOMContentLoaded', function(event){
 		.addEventListener('click', function(evt) {
 			console.log(app.data)
 		});
+	document.getElementById('btn5')
+		.addEventListener('click', function(evt) {
+			app.saveData()
+		});
+	document.getElementById('btn6')
+		.addEventListener('click', function(evt) {
+			app.loadData()
+		});
+
 
 	// checkbox
 	document.getElementById('cb1')

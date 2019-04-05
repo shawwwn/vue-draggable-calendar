@@ -102,7 +102,7 @@ var util_funcs = {
 			return data;
 		},
 
-		// generate matrix from span data
+		// generate matrix from span data (current week)
 		span2matrix(data) {
 			if (!this.cur_week) { return; } // exit if not initialized
 			var self = this;
@@ -195,6 +195,80 @@ var app = new Vue({
 				week.push(moment(date).weekday(wd));
 			}); 
 			this.cur_week = week;
+		},
+
+		// Convert current week's matrix data to span data and 
+		// save them to caldendar's internal storage while sync 
+		// to remote.
+		saveData() {
+			var self = this;
+			var spans = self.matrix2span(self.mat);
+			Object.entries(spans).forEach(function([key, val], i) {
+				if (val!=null) {
+					self.data[key] = val;
+				} else if (val==null && self.data.hasOwnProperty(key)) {
+					delete self.data[key]; // remove on null val
+				}
+			});
+
+			// push to server
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				// one-way sync, we don't care about server's return
+				console.log("pushed", JSON.parse(this.responseText));
+			};
+			xhr.open("PUT", "api/calendar");
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.send(JSON.stringify(spans));
+		},
+
+		// Load current week's span data and convert it into matrix data
+		// also load from server and decide whether view needs to be updated.
+		loadData() {
+			var self = this;
+			var cached = null;
+
+			// filter current week data from internal data
+			var spans_local = {};
+			self.cur_week.forEach(function(m, mi) {
+				let key = m.format('YYYY-MM-DD');
+				if (self.data.hasOwnProperty(key)) {
+					spans_local[key] = self.data[key];
+				}
+			});
+			updateView(spans_local);
+
+			// fetch current week data from server
+			var from_date = self.cur_week[0].format('YYYY-MM-DD');
+			var to_date = self.cur_week.slice(-1).pop().format('YYYY-MM-DD');
+			var xhr = new XMLHttpRequest();
+			xhr.onload = function() {
+				if (this.status>=200 && this.status<=300) {
+					var spans_remote = JSON.parse(this.responseText);
+					console.log("fetched", spans_remote);
+					updateView(spans_remote);
+				}
+			};
+			xhr.open("GET", `api/calendar?from=${from_date}&to=${to_date}`);
+			xhr.setRequestHeader('Content-Type', 'application/json');
+			xhr.send();
+			
+
+			// compare and decide wether to update view
+			function updateView(spans) {
+				if (cached) {
+					// compare & update
+					var current = JSON.stringify(spans);
+					if (cached != current) {
+						cached = current;
+						self.mat = self.span2matrix(spans);
+					}
+				} else {
+					// update
+					cached = JSON.stringify(spans);
+					self.mat = self.span2matrix(spans);
+				}
+			}
 		},
 
 		// start dragging
