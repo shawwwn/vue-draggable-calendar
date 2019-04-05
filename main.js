@@ -200,8 +200,8 @@ var app = new Vue({
 			this.loadData();
 		},
 
-		// Convert current view to span data and then
-		// save it to caldendar's internal storage while push
+		// Convert current view to span data and then save it 
+		// to caldendar's internal(cached) storage while push
 		// to remote.
 		saveData() {
 			var self = this;
@@ -225,14 +225,14 @@ var app = new Vue({
 			xhr.send(JSON.stringify(spans));
 		},
 
-		// Load internal span data and render view
+		// Load internal(cached) span data and render view
 		// also fetch span data from server to decide whether view
 		// needs to be updated.
 		loadData() {
 			var self = this;
 			var cached = null;
 
-			// filter current week data from internal data
+			// filter current week data from internal(cached) data
 			var spans_local = {};
 			self.cur_week.forEach(function(m, mi) {
 				let key = m.format('YYYY-MM-DD');
@@ -250,7 +250,8 @@ var app = new Vue({
 				if (this.status>=200 && this.status<=300) {
 					var spans_remote = JSON.parse(this.responseText);
 					console.log("fetched", spans_remote);
-					updateView(spans_remote);
+					updateView(spans_remote) &&
+					self.saveData();
 				}
 			};
 			xhr.open("GET", `api/calendar?from=${from_date}&to=${to_date}`);
@@ -266,11 +267,15 @@ var app = new Vue({
 					if (cached != current) {
 						cached = current;
 						self.mat = self.span2matrix(spans);
+						return true;
+					} else {
+						return false;
 					}
 				} else {
 					// update
 					cached = JSON.stringify(spans);
 					self.mat = self.span2matrix(spans);
+					return true;
 				}
 			}
 		},
