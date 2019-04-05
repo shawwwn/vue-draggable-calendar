@@ -195,10 +195,13 @@ var app = new Vue({
 				week.push(moment(date).weekday(wd));
 			}); 
 			this.cur_week = week;
+
+			// render view
+			this.loadData();
 		},
 
-		// Convert current week's matrix data to span data and 
-		// save them to caldendar's internal storage while sync 
+		// Convert current view to span data and then
+		// save it to caldendar's internal storage while push
 		// to remote.
 		saveData() {
 			var self = this;
@@ -222,8 +225,9 @@ var app = new Vue({
 			xhr.send(JSON.stringify(spans));
 		},
 
-		// Load current week's span data and convert it into matrix data
-		// also load from server and decide whether view needs to be updated.
+		// Load internal span data and render view
+		// also fetch span data from server to decide whether view
+		// needs to be updated.
 		loadData() {
 			var self = this;
 			var cached = null;
@@ -310,6 +314,7 @@ var app = new Vue({
 				this.mergeMatrices(this.mat, this.mat_overlay);
 				this.resetMatrix(this.mat_overlay, null);
 				this.$forceUpdate();
+				this.saveData();
 				// console.log(`drag end(${this.set_avail})`, this.to_slot, this.getCoords(this.to_slot));
 			}
 		},
@@ -323,6 +328,7 @@ var app = new Vue({
 				this.mergeMatrices(this.mat, this.mat_overlay);
 				this.resetMatrix(this.mat_overlay, null);
 				this.$forceUpdate();
+				this.saveData();
 				// console.log(`drag out(${this.set_avail})`, this.to_slot);
 			}
 		},
