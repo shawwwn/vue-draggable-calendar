@@ -1,3 +1,8 @@
+body {
+	display: flex;
+	flex-direction: column;
+}
+
 input, label {
 	vertical-align: middle;
 }
@@ -12,13 +17,26 @@ input[type="button"] {
 }
 
 #demo-control {
-	padding: 10px 5%;
+	margin: 10px 5%;
+	background-color: antiquewhite;
+	border: 1px solid;
+	padding: 5px;
 }
 
 #demo-container {
-	margin: auto; width: 90%; height: 75%;
+	margin: 0 5%;
+	width: 90%;
+	height: 75%;
+}
+
+#p1 {
+	color: red;
+	font-weight: bold;
+	margin-bottom: 5px;
 }
 
 #p1 > span {
-	font-weight: bold;
+	color: black;
+	font-weight: normal;
+	font-size: smaller;
 }
