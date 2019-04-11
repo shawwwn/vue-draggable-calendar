@@ -1,5 +1,5 @@
 # vue-draggable-calendar
-A draggable calendar I made when learning VueJS
+A [when2meet](https://www.when2meet.com/)-like calendar made with Vue.
 
 ![Demo](demo.gif)
 
