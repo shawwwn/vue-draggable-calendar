@@ -1,0 +1,3 @@
+[submodule "vueify.js"]
+	path = vueify.js
+	url = git@github.com:shawwwn/vueify.js.git

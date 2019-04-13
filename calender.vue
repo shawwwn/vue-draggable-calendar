@@ -1,188 +1,80 @@
-/*!
- * Main.js
- * Shawwwn (shawwwn1@gmail.com)
- */
+// calender.vue
 
-/*
- * Class methods for the Vue instance
- */
-var util_funcs = {
-	methods: {
-		isSlotAvailable: function(dom) {
-			return dom.classList.contains('ds-avail');
-		},
+<template>
+<div id="calender">
+	<div class='ds-control'>
+		<table>
+			<tr class='ds-nav'>
+				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].subtract(7, "day"))'><<</th>
+				<th class='ds-nav-info'>{{ cur_week[0].format('L') + " - " + cur_week.slice(-1).pop().format('l') }}</th>
+				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].add(7, "day"))'>>></th>
+			</tr>
+		</table>
+	</div>
 
-		// counting from top-left corner
-		getCoords: function(slot_dom) {
-			x = slot_dom.cellIndex - 1;
-			y = slot_dom.parentElement.rowIndex - 1;
-			return [x, y];
-		},
+	<div class="ds-calender">
+		<table>
+			<tr class='ds-row-header'>
+				<th class='placeholder'></th>
+				<th 
+				scope='col' 
+				v-for="(label, i) in day_labels" 
+				:class="{ 'ds-today': cur_week && today.isSame(cur_week[i], 'day') }"
+				:key="label" 
+				:col-index="i">
+					<span v-if="cur_week">{{ label + " " + cur_week[i].format('M/D') }}</span>
+					<span v-else>{{ label }}</span>
+				</th>
+			</tr>
 
-		// generate time slot matrix (column major)
-		create2DMatrix(x_dim, y_dim, val=false) {
-			var mat = new Array(x_dim);
-			for (var i=0; i<x_dim; i++) {
-				mat[i] = new Array(y_dim).fill(val);
-			}
-			return mat;
-		},
+			<tr 
+			v-for="(time, i) in time_labels" 
+			:class="{ 'ds-minor': (time.indexOf(':') != -1) }" 
+			:key="i" 
+			:row-index="i">
+				<td scope='row'>{{ (time.indexOf(':30')==-1 || display_half_hour_labels) ? time : "" }}</td>
+				<td 
+				class="ds-slot" 
+				v-for="(slots, j) in mat" 
+				:key="j" 
+				:class="{ 'ds-avail':(mat_overlay[j][i]!=null) ? mat_overlay[j][i] : mat[j][i] }"></td>
+			</tr>
+		</table>
+	</div>
+</div> <!-- calendar -->
+</template>
 
-		// fill a rectangular area with the 2d @matrix with @val.
-		updateMatrix(mat, rect, val) {
-			var [[x0, y0], [x1, y1]] = rect;
-			if (x1<x0) { x0 = [x1, x1=x0][0]; } // swap
-			if (y1<y0) { y0 = [y1, y1=y0][0]; } // swap
-			if (x0<0 || y0<0 || 
-				x1>mat.length-1 || y1>mat[0].length-1) {
-				return false; // out of bound coordinates
-			}
+<style scoped>
+</style>
 
-			for (var i=x0; i<=x1; i++) {
-				mat[i].fill(val, y0, y1+1);
-			}
-			return true;
-		},
+<script>
+import util_funcs from './utils.js'
 
-		// set all values in a matrix
-		resetMatrix(mat, val) {
-			mat.forEach((col) => col.fill(val));
-		},
-
-		// merge mat2 to mat1
-		mergeMatrices(mat1, mat2) {
-			mat1.forEach(function(col1, coli) {
-				let col2 = mat2[coli];
-				for (let rowi=0; rowi<col1.length; rowi++) {
-					if (col2[rowi] != null) {
-						col1[rowi] = col2[rowi];
-					}
-				}
-			});
-		},
-
-		// generate span data from matrix of current week
-		matrix2span(mat, drop_null=false) {
-			if (!this.cur_week) { return; } // exit if not initialized
-			var self = this;
-			var data = {}; // key is day, value is array of time spans
-			mat.forEach(function(col, coli) {
-				let spans = [];
-				let span = null;
-				for (var rowi=0; rowi<col.length; rowi++) {
-					if (col[rowi]) {
-						if (!span) {
-							// span starts at green
-							span = self.time_labels[rowi]
-						}
-					} else {
-						if (span) {
-							// span ends at white
-							span += " - "+self.time_labels[rowi];
-							spans.push(span);
-							span = null;
-						}
-					}
-				}
-
-				if (span) {
-					// span to very last row
-					spans.push(span+" - 12am");
-				}
-
-				let date = self.cur_week[coli].format('YYYY-MM-DD');
-				if (spans.length > 0) {
-					// day has time spans
-					data[date] = spans;
-				} else if (!drop_null) {
-					data[date] = null;
-				}
-			});
-
-			return data;
-		},
-
-		// generate matrix from span data (current week)
-		span2matrix(data) {
-			if (!this.cur_week) { return; } // exit if not initialized
-			var self = this;
-			var mat = self.create2DMatrix(self.x_dim, self.y_dim, val=false);
-			
-			self.cur_week.forEach(function(m, mi) {
-				let key = m.format('YYYY-MM-DD');
-				if (data[key]) {
-					data[key].forEach(function(span, si) {
-						let idx_pair = parseSpan(span); // [starti, stopi]
-						if (idx_pair) {
-							mat[mi].fill(true, idx_pair[0], idx_pair[1]);
-						}
-					});
-				}
-			});
-
-			return mat;
-
-			// text of time span to matrix index
-			function parseSpan(span) {
-				var time_pair = span.split(' - ');
-				var idx_pair = time_pair.map(time2index);
-				if (idx_pair[1] == 0) {
-					idx_pair[1] = 48;
-				}
-				if ((typeof idx_pair[0] != 'number') ||
-					(typeof idx_pair[1] != 'number') ||
-					(idx_pair[0] > idx_pair[1]) || 
-					(idx_pair[0] < 0) ||
-					(idx_pair[1] > 48)) {
-					return;
-				}
-				return idx_pair;
-
-				// time text to matrix index
-				function time2index(time) {
-					var match = time.match(/(\d+)(?::(\d+))?(am|pm)/i);
-					if (match) {
-						let hr = parseInt(match[1])
-						let min = parseInt((match[2] == undefined) ? 0 : match[2]);
-						let ampm = match[3];
-						if (hr == 12 && ampm == "am") { hr = 0; }
-						let idx = (hr * 2)
-								+ (min / 30 >> 0)
-								+ ((ampm == "am") ? 0 : 24);
-						return idx;
-					}
-					return;
-				}
-			}
-		},
-	}
-}
-
-var app = new Vue({
-	el: '#calender',
+export default {
 	mixins: [util_funcs],
-
-	data: {
-		dragging: false, // is curently dragging
-		set_avail: false, // current selection is to set slot available or not
-		from_slot: null, // drag from slot
-		to_slot: null, // drag to slot
-		day_labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-		cur_week: null, // [moment(), moment(), ...x7]
-		time_labels: [
-			"12am", "1am", "2am", "3am", "4am", "5am",
-			"6am", "7am", "8am", "9am", "10am", "11am",
-			"12pm", "1pm", "2pm", "3pm", "4pm", "5pm",
-			"6pm", "7pm", "8pm", "9pm", "10pm", "11pm"
-		],
-		half_hour_labels: true, // include half-hour labels in time_labels
-		display_half_hour_labels: false, // show half-hour label name
-		x_dim: null, // x dimension of the grid/matrix
-		y_dim: null, // y dimension of the grid/matrix
-		mat: null, // actual timeslot fulfillment grid
-		mat_overlay: null, // section box over the grid
-		today: moment(),
-		data: {}, // date time spans
+	data () {
+		return {
+			dragging: false, // is curently dragging
+			set_avail: false, // current selection is to set slot available or not
+			from_slot: null, // drag from slot
+			to_slot: null, // drag to slot
+			day_labels: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+			cur_week: null, // [moment(), moment(), ...x7]
+			time_labels: [
+				"12am", "1am", "2am", "3am", "4am", "5am",
+				"6am", "7am", "8am", "9am", "10am", "11am",
+				"12pm", "1pm", "2pm", "3pm", "4pm", "5pm",
+				"6pm", "7pm", "8pm", "9pm", "10pm", "11pm"
+			],
+			half_hour_labels: true, // include half-hour labels in time_labels
+			display_half_hour_labels: false, // show half-hour label name
+			x_dim: null, // x dimension of the grid/matrix
+			y_dim: null, // y dimension of the grid/matrix
+			mat: null, // actual timeslot fulfillment grid
+			mat_overlay: null, // section box over the grid
+			today: moment(),
+			data: {}, // date time spans
+		}
 	},
 
 	methods: {
@@ -336,7 +228,7 @@ var app = new Vue({
 				this.saveData();
 				// console.log(`drag out(${this.set_avail})`, this.to_slot);
 			}
-		},
+		}
 	},
 
 	created() {
@@ -383,5 +275,6 @@ var app = new Vue({
 				el.removeEventListener('mouseup', self.dragEnd);
 			});
 		document.removeEventListener('mouseup', self.dragOut);
-	},
-})
+	}
+}
+</script>
