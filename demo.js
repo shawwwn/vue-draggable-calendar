@@ -3,7 +3,10 @@
  * Shawwwn (shawwwn1@gmail.com)
  */
 
-document.addEventListener('DOMContentLoaded', function(event){
+document.addEventListener('DOMContentLoaded', (event) => setTimeout(() => {
+
+	let app = document.querySelector('#calender').__vue__;
+
 	// time
 	document.querySelector('#p1 > span')
 		.innerText = app.today;
@@ -58,4 +61,4 @@ document.addEventListener('DOMContentLoaded', function(event){
 			var cb = evt.target;
 			app.display_half_hour_labels = cb.checked;
 		});
-});
+}, 100));
