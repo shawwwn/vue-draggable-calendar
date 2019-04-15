@@ -8,7 +8,11 @@
 				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].subtract(7, "day"))'><<</th>
 				<th class='ds-nav-info'>
 					<p>{{ cur_week[0].format('L') + " - " + cur_week.slice(-1).pop().format('l') }}</p>
-					<calender-dropdown :today="today"></calender-dropdown>
+					<calender-dropdown
+					:today="today"
+					:nav_week="cur_week[0]"
+					@nav="navigateToDate">
+					</calender-dropdown>
 				</th>
 				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].add(7, "day"))'>>></th>
 			</tr>
@@ -143,6 +147,7 @@ tr.ds-minor {
 .ds-nav-btn {
 	width: 10%;
 	user-select: none;
+	cursor: pointer;
 }
 
 .ds-nav-btn:hover {
@@ -157,6 +162,11 @@ tr.ds-minor {
 
 .ds-nav-info {
 	position: relative;
+	cursor: pointer;
+}
+
+.ds-nav-info:hover {
+	background-color: #f1f1f1;
 }
 
 .ds-nav-info p {

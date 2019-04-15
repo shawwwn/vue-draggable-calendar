@@ -7,8 +7,8 @@
 		:key="week.id"
 		:class="{ 'ds-dropdown-highlight': week.current }"
 		:ref="(week.current) ? 'current_week_dom' : null"
-		:dd='week.id'
-	>{{ week.moment.startOf('isoWeek').format('l') + ' - ' + week.moment.endOf('isoWeek').format('l') }}</span>
+		@click="$emit('nav', week.moment)"
+	>{{ week.moment.startOf('week').format('l') + ' - ' + week.moment.endOf('week').format('l') }}</span>
 </div>
 </template>
 
@@ -64,12 +64,14 @@ span.ds-dropdown-highlight {
 export default {
 	created: function() {
 		var self = this;
-		this.current_week = moment(this.today).startOf('isoWeek');
+		this.cur_week = moment(this.today).startOf('week');
+		if (!this.nav_week)
+			this.nav_week = this.cur_week;
 
 		// generate N past/future weeks
 		const N = 10;
-		let past = spanNumWeeks.call(this, this.current_week, -N);
-		let future = spanNumWeeks.call(this, this.current_week, N);
+		let past = spanNumWeeks.call(this, this.cur_week, -N);
+		let future = spanNumWeeks.call(this, this.cur_week, N);
 		this.weeks = past.concat(future);
 
 		// register
@@ -79,6 +81,7 @@ export default {
 			if (dom && dom.previousElementSibling) {
 				dom.previousElementSibling.addEventListener('click', function(evt) {
 					dom.classList.toggle('ds-dropdown-hide');
+					self.scrollToNavWeek();
 					evt.preventDefault();
 					evt.stopPropagation();
 				});
@@ -87,8 +90,8 @@ export default {
 				dom.classList.add('ds-dropdown-hide');
 			});
 
-			// scroll to current week
-			this.scrollToCurrentWeek();
+			// scroll to the week on display
+			this.scrollToNavWeek();
 			dom.classList.add('ds-dropdown-hide');
 
 			// register scrolls
@@ -128,7 +131,6 @@ export default {
 					// the dropdown menu
 					function scrollToNthWeek(nth) {
 						let self = this;
-						console.log(self);
 						this.$nextTick(function() {
 							self.$refs
 								.container_dom
@@ -152,16 +154,29 @@ export default {
 			}
 
 			return new Array(n).fill(undefined).map((val, i) => {
-				let m = moment(from_week).add(i, 'week').startOf('isoWeek');
+				let m = moment(from_week).add(i, 'week').startOf('week');
 				return {
 					id: m.format('x'),
 					moment: m,
-					current: m.isSame(self.current_week, 'week'),
+					current: m.isSame(self.cur_week, 'week'),
 				};
 			});
 		}
 	},
-	props: ['today'],
+
+	props: {
+		// moment() of today, use to highlight current week item
+		today: {
+			type: Object,
+			default: moment(),
+		},
+		// the week you are currently navigating in
+		nav_week: {
+			type: Object,
+			default: null,
+		},
+	},
+
 	data () {
 		return {
 			weeks: null,
@@ -169,11 +184,38 @@ export default {
 	},
 
 	methods: {
+		/**
+		 * Scroll to current week
+		 */
 		scrollToCurrentWeek() {
 			this.$refs
-				.current_week_dom[0]
+				.cur_week_dom[0]
 				.scrollIntoView(true);
 		},
+
+		/**
+		 * Scroll to the week you are current navigating/editing\
+		 * TODO: Add items to dropdown menu if there is no items
+		 *       for `this.nav_week`
+		 */
+		scrollToNavWeek() {
+			var cur_week_dom = this.$refs.current_week_dom[0];
+			var d = moment.duration(this.nav_week.diff(this.cur_week));
+			d = parseInt(Math.ceil(d.asWeeks())); // num of weeks to current week
+			var dom = getNthElementSibling(cur_week_dom, d);
+			dom.scrollIntoView(true);
+
+			// get the forward/backward n-th sibiling element
+			function getNthElementSibling(from_dom, n) {
+				if ((!from_dom) || (n == 0)) {
+					return from_dom;
+				} else {
+					let forward = (n > 0);
+					let next_dom = (forward) ? from_dom.nextElementSibling : from_dom.previousElementSibling;
+					return getNthElementSibling(next_dom, (forward) ? n-1 : n+1);
+				}
+			}
+		}
 	},
 }
 </script>
