@@ -6,7 +6,10 @@
 		<table>
 			<tr class='ds-nav'>
 				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].subtract(7, "day"))'><<</th>
-				<th class='ds-nav-info'>{{ cur_week[0].format('L') + " - " + cur_week.slice(-1).pop().format('l') }}</th>
+				<th class='ds-nav-info'>
+					<p>{{ cur_week[0].format('L') + " - " + cur_week.slice(-1).pop().format('l') }}</p>
+					<calender-dropdown :today="today"></calender-dropdown>
+				</th>
 				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].add(7, "day"))'>>></th>
 			</tr>
 		</table>
@@ -133,12 +136,8 @@ tr.ds-minor {
 	font-weight: normal;
 }
 
-th[scope="col"], .placeholder {
-	border-top: none;
-}
-
 .ds-control {
-	flex: 1 0 30px;
+	flex: 1 0;
 }
 
 .ds-nav-btn {
@@ -157,15 +156,25 @@ th[scope="col"], .placeholder {
 }
 
 .ds-nav-info {
+	position: relative;
+}
 
+.ds-nav-info p {
+	padding: 5px 0;
 }
 </style>
 
 <script>
 import util_funcs from './utils.js'
+import dropdown from './calender-dropdown.vue'
 
 export default {
 	mixins: [util_funcs],
+
+	components: {
+		'calender-dropdown': dropdown,
+	},
+
 	data () {
 		return {
 			dragging: false, // is curently dragging
