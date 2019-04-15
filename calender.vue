@@ -220,15 +220,7 @@ export default {
 				}
 			});
 
-			// push to server
-			var xhr = new XMLHttpRequest();
-			xhr.onload = function() {
-				// one-way sync, we don't care about server's return
-				console.log("pushed", JSON.parse(this.responseText));
-			};
-			xhr.open("PUT", "api/calendar");
-			xhr.setRequestHeader('Content-Type', 'application/json');
-			xhr.send(JSON.stringify(spans));
+			this.$emit('push', spans);
 		},
 
 		// Load internal(cached) span data and render view
@@ -248,22 +240,21 @@ export default {
 			});
 			updateView(spans_local);
 
-			// fetch current week data from server
-			var from_date = self.cur_week[0].format('YYYY-MM-DD');
-			var to_date = self.cur_week.slice(-1).pop().format('YYYY-MM-DD');
-			var xhr = new XMLHttpRequest();
-			xhr.onload = function() {
-				if (this.status>=200 && this.status<=300) {
-					var spans_remote = JSON.parse(this.responseText);
-					console.log("fetched", spans_remote);
+			// make parent fetch current week's data
+			new Promise((resolve, reject) => {
+				self.$emit('pull',
+					self.cur_week[0], // from_date (moment obj)
+					self.cur_week.slice(-1).pop(), // to_date (moment obj)
+					resolve, reject);
+			}).then(
+				(spans_remote) => {
 					updateView(spans_remote) &&
 					self.saveData();
+				},
+				(reason) => {
+					console.error(`Failed to fetch: ${reason}`)
 				}
-			};
-			xhr.open("GET", `api/calendar?from=${from_date}&to=${to_date}`);
-			xhr.setRequestHeader('Content-Type', 'application/json');
-			xhr.send();
-			
+			);
 
 			// compare and decide wether to update view
 			function updateView(spans) {
