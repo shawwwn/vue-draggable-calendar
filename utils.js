@@ -96,7 +96,7 @@ var util_funcs = {
 			return data;
 		},
 
-		// generate matrix from span data (current week)
+		// generate matrix from span data (for current week)
 		span2matrix(data) {
 			if (!this.cur_week) { return; } // exit if not initialized
 			var self = this;
@@ -106,7 +106,7 @@ var util_funcs = {
 				let key = m.format('YYYY-MM-DD');
 				if (data[key]) {
 					data[key].forEach(function(span, si) {
-						let idx_pair = parseSpan(span); // [starti, stopi]
+						let idx_pair = self.parseSpan(span); // [starti, stopi]
 						if (idx_pair) {
 							mat[mi].fill(true, idx_pair[0], idx_pair[1]);
 						}
@@ -115,40 +115,64 @@ var util_funcs = {
 			});
 
 			return mat;
-
-			// text of time span to matrix index
-			function parseSpan(span) {
-				var time_pair = span.split(' - ');
-				var idx_pair = time_pair.map(time2index);
-				if (idx_pair[1] == 0) {
-					idx_pair[1] = 48;
-				}
-				if ((typeof idx_pair[0] != 'number') ||
-					(typeof idx_pair[1] != 'number') ||
-					(idx_pair[0] > idx_pair[1]) || 
-					(idx_pair[0] < 0) ||
-					(idx_pair[1] > 48)) {
-					return;
-				}
-				return idx_pair;
-
-				// time text to matrix index
-				function time2index(time) {
-					var match = time.match(/(\d+)(?::(\d+))?(am|pm)/i);
-					if (match) {
-						let hr = parseInt(match[1])
-						let min = parseInt((match[2] == undefined) ? 0 : match[2]);
-						let ampm = match[3];
-						if (hr == 12 && ampm == "am") { hr = 0; }
-						let idx = (hr * 2)
-								+ (min / 30 >> 0)
-								+ ((ampm == "am") ? 0 : 24);
-						return idx;
-					}
-					return;
-				}
-			}
 		},
+
+		// generate matrix coordinates[start(x,y), end(x,y)] 
+		// from span data (for current week)
+		span2coords(spans) {
+			if (!this.cur_week) { return; } // exit if not initialized
+			var self = this;
+			var coords = [];
+
+			self.cur_week.forEach(function(m, x) {
+				let key = m.format('YYYY-MM-DD');
+				if (spans[key]) {
+					spans[key].forEach(function(span, si) {
+						let ys = self.parseSpan(span); // [starti, stopi]
+						coords.push({
+							start: [x, ys[0]],
+							end: [x, ys[1]-1],
+						});
+					}); // end of spans[key].forEach()
+				}
+			}); // end of cur_week.forEach()
+
+			return coords;
+		},
+
+		// text of time span to matrix index
+		parseSpan(span) {
+			var time_pair = span.split(' - ');
+			var idx_pair = time_pair.map(this.time2index);
+			if (idx_pair[1] == 0) {
+				idx_pair[1] = 48;
+			}
+			if ((typeof idx_pair[0] != 'number') ||
+				(typeof idx_pair[1] != 'number') ||
+				(idx_pair[0] > idx_pair[1]) || 
+				(idx_pair[0] < 0) ||
+				(idx_pair[1] > 48)) {
+				return;
+			}
+			return idx_pair;
+		},
+
+		// time text to matrix index
+		time2index(time) {
+			var match = time.match(/(\d+)(?::(\d+))?(am|pm)/i);
+			if (match) {
+				let hr = parseInt(match[1])
+				let min = parseInt((match[2] == undefined) ? 0 : match[2]);
+				let ampm = match[3];
+				if (hr == 12 && ampm == "am") { hr = 0; }
+				let idx = (hr * 2)
+						+ (min / 30 >> 0)
+						+ ((ampm == "am") ? 0 : 24);
+				return idx;
+			}
+			return;
+		},
+
 	}
 }
 

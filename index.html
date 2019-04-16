@@ -25,7 +25,11 @@
 		</div>
 		
 		<div id="demo-container">
-			<calender @push="push" @pull="pull"></calender>
+			<calender
+			@push="push"
+			@pull="pull"
+			@pull_overlay="pull_overlay"
+			></calender>
 		</div> <!-- container -->
 	</body>
 
@@ -37,6 +41,25 @@
 		var app = new Vue({
 			el: '#demo-container',
 			methods: {
+
+				// pull overlay data from server
+				pull_overlay: function(from_date, to_date, resolve, reject) {
+					from_date = from_date.format('YYYY-MM-DD');
+					to_date = to_date.format('YYYY-MM-DD');
+					var xhr = new XMLHttpRequest();
+					xhr.onload = function() {
+						if (this.status>=200 && this.status<=300) {
+							var spans_remote = JSON.parse(this.responseText);
+							console.log("fetched overlay", spans_remote);
+							resolve(spans_remote);
+						} else {
+							reject(this.status);
+						}
+					};
+					xhr.open("GET", `api/calendar_overlay?from=${from_date}&to=${to_date}`);
+					xhr.setRequestHeader('Content-Type', 'application/json');
+					xhr.send();
+				},
 
 				// push to server
 				push: function(spans) {

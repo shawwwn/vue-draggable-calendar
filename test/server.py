@@ -28,8 +28,17 @@ class DataTimeSpans(Resource):
 		db.update(json_data)
 		return db.get()
 
+db_overlay = MockDB('db_overlay.json')
+class OverlaySpans(Resource):
+	def get(self):
+		print("GET:", request.args)
+		from_date = request.args.get('from', None)
+		to_date = request.args.get('to', None)
+		return db_overlay.get(from_date, to_date)
+
 api = Api(app)
 api.add_resource(DataTimeSpans, '/api/calendar')
+api.add_resource(OverlaySpans, '/api/calendar_overlay')
 
 if __name__ == '__main__':
 	app.run(host='127.0.0.1', port=5000, debug=True)

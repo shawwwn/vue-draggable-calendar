@@ -5,7 +5,7 @@
 	<div class='ds-control'>
 		<table>
 			<tr class='ds-nav'>
-				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].subtract(7, "day"))'><<</th>
+				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0], -7)'><<</th>
 				<th class='ds-nav-info'>
 					<p>{{ cur_week[0].format('L') + " - " + cur_week.slice(-1).pop().format('l') }}</p>
 					<calender-dropdown
@@ -14,13 +14,13 @@
 					@nav="navigateToDate">
 					</calender-dropdown>
 				</th>
-				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0].add(7, "day"))'>>></th>
+				<th class='ds-nav-btn' @click='navigateToDate(cur_week[0], 7)'>>></th>
 			</tr>
 		</table>
 	</div>
 
 	<div class="ds-calender">
-		<table>
+		<table ref='table'>
 			<tr class='ds-row-header'>
 				<th class='placeholder'></th>
 				<th 
@@ -34,6 +34,11 @@
 				</th>
 			</tr>
 
+			<calender-overlay
+			:cur_week="cur_week"
+			@pull_overlay="(...args) => { $emit('pull_overlay', ...args); }"
+			></calender-overlay>
+
 			<tr 
 			v-for="(time, i) in time_labels" 
 			:class="{ 'ds-minor': (time.indexOf(':') != -1) }" 
@@ -44,6 +49,7 @@
 				class="ds-slot" 
 				v-for="(slots, j) in mat" 
 				:key="j" 
+				:col-index="j"
 				:class="{ 'ds-avail':(mat_overlay[j][i]!=null) ? mat_overlay[j][i] : mat[j][i] }"></td>
 			</tr>
 		</table>
@@ -177,12 +183,14 @@ tr.ds-minor {
 <script>
 import util_funcs from './utils.js'
 import dropdown from './calender-dropdown.vue'
+import overlay from './calender-overlay.vue'
 
 export default {
 	mixins: [util_funcs],
 
 	components: {
 		'calender-dropdown': dropdown,
+		'calender-overlay': overlay,
 	},
 
 	data () {
@@ -212,8 +220,8 @@ export default {
 
 	methods: {
 		// render current week from input date
-		navigateToDate(date) {
-			date = moment(date);
+		navigateToDate(date, offest=0) {
+			date = moment(date).add(offest, "day");
 			var week = [];
 			this.day_labels.forEach(function(label, i) {
 				let wd = moment(label, 'ddd').weekday();
@@ -372,8 +380,6 @@ export default {
 		this.mat_overlay = this.create2DMatrix(this.x_dim, this.y_dim, null);
 
 		this.navigateToDate(); // today
-
-		// TODO: update time slot matrix from DB
 	},
 
 	mounted() {
