@@ -92,7 +92,7 @@ export default {
 			};
 
 			function getTableCell(table, x, y) {
-				return table.querySelector(`[row-index="${y-1}"] > [col-index="${x+1}"]`);
+				return table.querySelector(`[row-index="${y-1}"] > [col-index="${x}"]`);
 			}
 		},
 

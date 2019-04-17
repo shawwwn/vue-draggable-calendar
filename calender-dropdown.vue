@@ -115,7 +115,7 @@ export default {
 						let future = spanNumWeeks.call(self, m, N);
 						self.weeks.splice(self.weeks.length, 0, ...future);
 						muteTemporarily();
-						scrollToNthWeek.call(self, self.weeks.length-N);
+						scrollToNthWeek.call(self, self.weeks.length-1-N);
 					}
 
 					// disable event listener for a short while
@@ -194,7 +194,7 @@ export default {
 		},
 
 		/**
-		 * Scroll to the week you are current navigating/editing\
+		 * Scroll to the week you are current navigating/editing
 		 * TODO: Add items to dropdown menu if there is no items
 		 *       for `this.nav_week`
 		 */
