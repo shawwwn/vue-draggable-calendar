@@ -5,7 +5,7 @@
 	<div class="ds-patch"
 	ref="patches"
 	v-for="(rect, index) in coords"
-	v-bind:style="genStyle(rect)"
+	:style="genStyle(rect)"
 	></div>
 </div>
 </template>
@@ -23,7 +23,7 @@ h1 {
 .ds-patch {
 	position: absolute;
 	background-color: #4682b4bf;
-	border: 3px solid #2196f3;
+	border: 2px solid #2196f3;
 	border-radius: 10px;
 	box-sizing: border-box;
 }
@@ -45,6 +45,10 @@ export default {
 			type: String,
 			default: 'blue',
 		},
+		margin: {
+			type: Number,
+			default: 2,
+		},
 	},
 
 	watch: {
@@ -54,7 +58,11 @@ export default {
 	},
 
 	created() {
+		var self = this;
 		this.loadOverlayData();
+		window.addEventListener("resize", function(evt) {
+			self.$forceUpdate();
+		});
 	},
 
 	data() {
@@ -65,13 +73,6 @@ export default {
 	},
 
 	methods: {
-		log(evt) {
-			// this.loadOverlayData();
-
-			console.log('cur_week', this.cur_week);
-			console.log('coords', this.coords);
-			console.log('spans', this.spans);
-		},
 
 		genStyle(rect) {
 			var table_dom = this.$parent.$refs.table;
@@ -86,9 +87,10 @@ export default {
 			return {
 				top: `${y0}px`,
 				left: `${x0}px`,
-				width: `${x1-x0}px`,
-				height: `${y1-y0}px`,
+				width: `${x1-x0-this.margin*2}px`,
+				height: `${y1-y0-this.margin*2}px`,
 				display: 'block',
+				margin: `${this.margin}px`,
 			};
 
 			function getTableCell(table, x, y) {
